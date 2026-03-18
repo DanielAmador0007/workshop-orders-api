@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: workshop-orders-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+      POSTGRES_DB: workshop_orders
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: workshop-orders-api
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    depends_on:
+      - postgres
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres123
+      DB_NAME: workshop_orders
+      JWT_SECRET: super-secret-jwt-key-change-in-production
+      JWT_EXPIRATION: 1d
+      APP_PORT: 3000
+
+volumes:
+  pgdata:
